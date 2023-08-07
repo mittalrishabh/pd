@@ -383,7 +383,7 @@ func (h *Handler) GetOperator(regionID uint64) (*operator.Operator, error) {
 func (h *Handler) GetOperatorStatus(regionID uint64) (*schedule.OperatorWithStatus, error) {
 	c, err := h.GetOperatorController()
 	if err != nil {
-        og.Debug("fail to get operator controller", errs.ZapError(err))
+        log.Debug("fail to get operator controller", errs.ZapError(err))
 		return nil, err
 	}
 
