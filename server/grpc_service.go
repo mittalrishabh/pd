@@ -1302,7 +1302,6 @@ func (s *GrpcServer) ScatterRegion(ctx context.Context, request *pdpb.ScatterReg
 		return &pdpb.ScatterRegionResponse{Header: s.notBootstrappedHeader()}, nil
 	}
 
-	if len(request.GetRegionsId()) > 0 {
 		percentage, err := scatterRegions(rc, request.GetRegionsId(), request.GetGroup(), int(request.GetRetryLimit()))
 		if err != nil {
 			return nil, err
@@ -1311,33 +1310,6 @@ func (s *GrpcServer) ScatterRegion(ctx context.Context, request *pdpb.ScatterReg
 			Header:             s.header(),
 			FinishedPercentage: uint64(percentage),
 		}, nil
-	}
-	// TODO: Deprecate it use `request.GetRegionsID`.
-	//nolint
-	region := rc.GetRegion(request.GetRegionId())
-	if region == nil {
-		if request.GetRegion() == nil {
-			//nolint
-			return &pdpb.ScatterRegionResponse{
-				Header: s.wrapErrorToHeader(pdpb.ErrorType_REGION_NOT_FOUND,
-					"region %d not found"),
-			}, nil
-		}
-		region = core.NewRegionInfo(request.GetRegion(), request.GetLeader())
-	}
-
-	op, err := rc.GetRegionScatter().Scatter(region, request.GetGroup())
-	if err != nil {
-		return nil, err
-	}
-	if op != nil {
-		rc.GetOperatorController().AddOperator(op)
-	}
-
-	return &pdpb.ScatterRegionResponse{
-		Header:             s.header(),
-		FinishedPercentage: 100,
-	}, nil
 }
 
 // GetGCSafePoint implements gRPC PDServer.
