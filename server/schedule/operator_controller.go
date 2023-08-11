@@ -324,6 +324,7 @@ func (oc *OperatorController) AddOperator(ops ...*operator.Operator) bool {
 	// but maybe user want to add operator when waiting queue is busy
 	if oc.exceedStoreLimitLocked(ops...) || !oc.checkAddOperator(false, ops...) {
 		for _, op := range ops {
+            operatorCounter.WithLabelValues(op.Desc(), "store_limit").Inc()
 			_ = op.Cancel()
 			oc.buryOperator(op)
 		}
